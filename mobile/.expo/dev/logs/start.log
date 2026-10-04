@@ -1,0 +1,23 @@
+{"_e":"root:init","_t":1791063615577,"format":"v0-jsonl","version":"57.0.27"}
+{"_e":"env:mode","_t":1791063615582,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1791063615588,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1791063616455,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1791063617248,"serverRoot":"../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"expo:dev-tools-plugin:load","_t":1791063617965,"plugins":[]}
+{"_e":"metro:instantiate","_t":1791063627107,"atlas":false,"workers":1,"host":"::","port":8081}
+{"_e":"root:init","_t":1791063634679,"format":"v0-jsonl","version":"57.0.27"}
+{"_e":"env:mode","_t":1791063634683,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1791063634686,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1791063635640,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1791063636592,"serverRoot":"../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1791063637169,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[1003/214037.155801:FATAL:electron/shell/app/electron_main_delegate.cc:313] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.\n"]}
+{"_e":"expo:dev-tools-plugin:load","_t":1791063637217,"plugins":[]}
+{"_e":"metro:instantiate","_t":1791063637487,"atlas":false,"workers":1,"host":"::","port":8081}
+{"_e":"root:init","_t":1791063700568,"format":"v0-jsonl","version":"57.0.27"}
+{"_e":"env:mode","_t":1791063700569,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1791063700571,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1791063700829,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../../../src/app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1791063701179,"serverRoot":"../../..","projectRoot":"../../..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:server_log","_t":1791063701464,"level":"error","data":["An unknown error occurred while installing React Native DevTools. Details:\n\n[1003/214141.448706:FATAL:electron/shell/app/electron_main_delegate.cc:313] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.\n"]}
+{"_e":"expo:dev-tools-plugin:load","_t":1791063701568,"plugins":[]}
+{"_e":"metro:instantiate","_t":1791063701685,"atlas":false,"workers":1,"host":"::","port":8081}

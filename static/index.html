@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Sai Sandesh — Daily Sathya Sai Devotional</title>
+  <meta name="description" content="Sai Sandesh: a daily Sathya Sai devotional — Swami's words, reflection, bhajan, and seva, in a two-minute read." />
+  <meta name="theme-color" content="#141032" />
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sai Sandesh" />
+  <meta property="og:title" content="Sai Sandesh" />
+  <meta property="og:description" content="A daily Sathya Sai devotional — Swami's words, reflection, bhajan, and seva." />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>" />
+</head>
+<body>
+  <header class="app-header">
+    <span class="om">🪔</span>
+    <h1>Sai Sandesh</h1>
+    <p class="tagline">Daily Sathya Sai Devotional</p>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section id="view-today" class="view active" aria-label="Today">
+      <div id="today-content"><div class="loading">Loading today's Sandesh…</div></div>
+    </section>
+
+    <!-- TOPICS -->
+    <section id="view-topics" class="view" aria-label="Topics">
+      <div id="topics-content"><div class="loading">Loading topics…</div></div>
+    </section>
+
+    <!-- SEARCH -->
+    <section id="view-search" class="view" aria-label="Search">
+      <div class="card">
+        <h2 style="margin-top:0">Search Swami's Words</h2>
+        <div class="search-box">
+          <input id="search-q" type="search" placeholder="e.g. selfless service" enterkeyhint="search" />
+          <select id="search-topic" aria-label="Filter by topic">
+            <option value="">All topics</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="search-btn">🔍 Search</button>
+      </div>
+      <div id="search-results"></div>
+    </section>
+
+    <!-- ARCHIVE -->
+    <section id="view-archive" class="view" aria-label="Archive">
+      <div class="card">
+        <h2 style="margin-top:0">Past Sandeshs</h2>
+        <ul class="archive-list" id="archive-list"><div class="loading">Loading archive…</div></ul>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button data-view="today" class="active"><span class="ico">🌅</span>Today</button>
+    <button data-view="topics"><span class="ico">📿</span>Topics</button>
+    <button data-view="search"><span class="ico">🔍</span>Search</button>
+    <button data-view="archive"><span class="ico">📚</span>Archive</button>
+  </nav>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#141032",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "package": "ai.saisandesh.app",
+      "versionCode": 1
+    },
+    "icon": "./assets/icon.png",
+    "ios": {
+      "buildNumber": "1",
+      "bundleIdentifier": "ai.saisandesh.app",
+      "supportsTablet": true
+    },
+    "name": "Sai Sandesh",
+    "orientation": "portrait",
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#141032"
+        }
+      ]
+    ],
+    "scheme": "saisandesh",
+    "slug": "sai-sandesh",
+    "userInterfaceStyle": "light",
+    "version": "1.0.0",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4f171c70-50dc-41c0-b1cb-367f5dcff583"
+      }
+    },
+    "owner": "saikirankumar"
+  }
+}

@@ -248,6 +248,13 @@ main { max-width: 640px; margin: 0 auto; padding: 16px 16px 24px; }
 .result-item:last-child { border-bottom: none; }
 .result-cite { font-weight: 700; color: var(--indigo-800); font-size: 15px; margin: 0 0 6px; }
 .result-excerpt { margin: 0; font-size: 16px; color: var(--ink); }
+.result-link {
+  display: block; width: 100%; text-align: left; background: none; border: none;
+  padding: 0; margin: 0 0 6px; cursor: pointer;
+  font-weight: 700; color: var(--indigo-800); font-size: 15px; font-family: inherit;
+}
+.result-link .read-more { font-weight: 400; font-size: 13px; color: var(--indigo-800); opacity: 0.7; white-space: nowrap; }
+.discourse-body p { font-size: 17px; line-height: 1.75; margin: 0 0 1em; }
 
 /* ---------- archive ---------- */
 .archive-list { list-style: none; margin: 0; padding: 0; }

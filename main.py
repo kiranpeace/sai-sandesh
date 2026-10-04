@@ -182,7 +182,7 @@ def api_search(
 
         match = _sanitize(q)
         if topic_id is not None:
-            sql = """SELECT c.text, d.kind, d.title, d.volume, d.discourse_date
+            sql = """SELECT c.text, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
@@ -191,7 +191,7 @@ def api_search(
                      ORDER BY bm25(chunks_fts) LIMIT ?"""
             rows = c.execute(sql, (match, topic_id, limit)).fetchall()
         else:
-            sql = """SELECT c.text, d.kind, d.title, d.volume, d.discourse_date
+            sql = """SELECT c.text, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
@@ -204,6 +204,7 @@ def api_search(
             txt = _excerpt(r["text"], q)
             out.append(
                 {
+                    "doc_id": r["doc_id"],
                     "title": r["title"],
                     "volume": r["volume"],
                     "date": r["discourse_date"],
@@ -216,6 +217,40 @@ def api_search(
         raise HTTPException(status_code=400, detail=f"bad query: {e}")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        con.close()
+
+
+@app.get("/api/discourse/{doc_id}")
+@app.get(V1 + "/discourse/{doc_id}")
+def api_discourse(doc_id: int):
+    """Full text of one discourse/Vahini, reassembled from chunks in order."""
+    if not os.path.isfile(DB_PATH):
+        raise HTTPException(status_code=503, detail="corpus database not available")
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    c = con.cursor()
+    try:
+        doc = c.execute(
+            "SELECT id, kind, title, volume, discourse_date, word_count FROM documents WHERE id=?",
+            (doc_id,),
+        ).fetchone()
+        if not doc:
+            raise HTTPException(status_code=404, detail="discourse not found")
+        chunks = c.execute(
+            "SELECT text FROM chunks WHERE doc_id=? ORDER BY seq", (doc_id,)
+        ).fetchall()
+        text = "\n\n".join(re.sub(r"\s+", " ", ch["text"]).strip() for ch in chunks)
+        return {
+            "doc_id": doc["id"],
+            "kind": doc["kind"],
+            "title": doc["title"],
+            "volume": doc["volume"],
+            "date": doc["discourse_date"],
+            "citation": _cite(doc["kind"], doc["title"], doc["volume"], doc["discourse_date"]),
+            "word_count": doc["word_count"],
+            "text": text,
+        }
     finally:
         con.close()
 

@@ -255,12 +255,38 @@ async function runSearch() {
     const hits = await r.json();
     if (!hits.length) { box.innerHTML = '<div class="empty">No passages found. Try a different word.</div>'; return; }
     box.innerHTML = '<div class="card">' + hits.map((h) =>
-      '<div class="result-item"><p class="result-cite">' + esc(h.citation || h.title) + "</p>" +
+      '<div class="result-item"><button class="result-link" data-doc="' + h.doc_id + '">' +
+      esc(h.citation || h.title) + ' <span class="read-more">Read full →</span></button>' +
       '<p class="result-excerpt">' + esc(h.excerpt) + "</p></div>").join("") + "</div>";
+    box.querySelectorAll("[data-doc]").forEach((b) =>
+      b.addEventListener("click", () => openDiscourse(b.getAttribute("data-doc"))));
   } catch (e) {
     box.innerHTML = '<div class="error">Search failed: ' + esc(e.message) + "</div>";
   }
 }
+
+/* ---------------- reader ---------------- */
+
+async function openDiscourse(docId) {
+  const box = $("#reader-content");
+  switchView("reader");
+  box.innerHTML = '<div class="loading">Loading discourse…</div>';
+  try {
+    const r = await fetch("/api/discourse/" + encodeURIComponent(docId));
+    if (!r.ok) throw new Error("could not load discourse");
+    const d = await r.json();
+    const paras = esc(d.text).split(/\n\n+/).map((p) => "<p>" + p + "</p>").join("");
+    box.innerHTML = "<h2 style='margin-top:0'>" + esc(d.title) + "</h2>" +
+      '<p class="citation">' + esc(d.citation) +
+      (d.word_count ? " · " + Number(d.word_count).toLocaleString() + " words" : "") + "</p>" +
+      '<div class="discourse-body">' + paras + "</div>";
+    window.scrollTo(0, 0);
+  } catch (e) {
+    box.innerHTML = '<div class="error">Could not load the discourse.</div>';
+  }
+}
+
+$("#reader-back").addEventListener("click", () => switchView("search"));
 
 /* ---------------- archive ---------------- */
 

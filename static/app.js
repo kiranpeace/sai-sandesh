@@ -257,6 +257,7 @@ async function runSearch() {
     box.innerHTML = '<div class="card">' + hits.map((h) =>
       '<div class="result-item"><button class="result-link" data-doc="' + h.doc_id + '">' +
       esc(h.citation || h.title) + ' <span class="read-more">Read full →</span></button>' +
+      (h.gist ? '<p class="result-gist"><span class="gist-label">Meaning:</span> ' + esc(h.gist) + "</p>" : "") +
       '<p class="result-excerpt">' + esc(h.excerpt) + "</p></div>").join("") + "</div>";
     box.querySelectorAll("[data-doc]").forEach((b) =>
       b.addEventListener("click", () => openDiscourse(b.getAttribute("data-doc"))));

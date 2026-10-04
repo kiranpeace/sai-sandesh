@@ -182,7 +182,7 @@ def api_search(
 
         match = _sanitize(q)
         if topic_id is not None:
-            sql = """SELECT c.text, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
+            sql = """SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
@@ -191,7 +191,7 @@ def api_search(
                      ORDER BY bm25(chunks_fts) LIMIT ?"""
             rows = c.execute(sql, (match, topic_id, limit)).fetchall()
         else:
-            sql = """SELECT c.text, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
+            sql = """SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
@@ -205,6 +205,7 @@ def api_search(
             out.append(
                 {
                     "doc_id": r["doc_id"],
+                    "gist": r["gist"],
                     "title": r["title"],
                     "volume": r["volume"],
                     "date": r["discourse_date"],

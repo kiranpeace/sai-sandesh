@@ -130,6 +130,28 @@ def _cite(kind: str, title: str, volume: str, d: str) -> str:
     return f"{title} (Vahini)"
 
 
+def _excerpt(txt: str, query: str, width: int = 420) -> str:
+    """Excerpt centered on the first query-term match, so the user sees why
+    the chunk matched instead of an unrelated opening paragraph."""
+    txt = re.sub(r"\s+", " ", txt).strip()
+    terms = [t.lower() for t in re.findall(r"[A-Za-z']+", query) if len(t) > 2]
+    low = txt.lower()
+    pos = -1
+    for t in terms:
+        i = low.find(t)
+        if i != -1 and (pos == -1 or i < pos):
+            pos = i
+    start = max(0, pos - 140) if pos != -1 else 0
+    end = min(len(txt), start + width)
+    s = txt[start:end]
+    if start > 0:
+        sp = s.find(" ")
+        s = ("…" + s[sp + 1 :]) if sp != -1 else ("…" + s)
+    if end < len(txt):
+        s = s.rsplit(" ", 1)[0] + "…"
+    return s
+
+
 @app.get("/api/search")
 @app.get(V1 + "/search")
 def api_search(
@@ -179,9 +201,7 @@ def api_search(
 
         out = []
         for r in rows:
-            txt = re.sub(r"\s+", " ", r["text"]).strip()
-            if len(txt) > 420:
-                txt = txt[:420].rsplit(" ", 1)[0] + "…"
+            txt = _excerpt(r["text"], q)
             out.append(
                 {
                     "title": r["title"],

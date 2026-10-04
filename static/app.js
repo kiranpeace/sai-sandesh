@@ -63,6 +63,11 @@ function renderDevotional(dev, container) {
   if (dev.bhajan && dev.bhajan.title) {
     let html = '<div class="card"><div class="section-label">🎵 Bhajan</div>' +
       "<h3 style='margin:0 0 8px'>" + esc(dev.bhajan.title) + "</h3>";
+    const bEmbed = dev.bhajan.url ? youtubeEmbedUrl(dev.bhajan.url) : null;
+    if (bEmbed) {
+      html += '<div class="video-embed"><iframe src="' + bEmbed + '" title="' + esc(dev.bhajan.title) +
+        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+    }
     if (dev.bhajan.url) {
       html += '<div class="btn-row"><a class="btn btn-outline" href="' + esc(dev.bhajan.url) +
         '" target="_blank" rel="noopener">🎧 Listen</a></div>';

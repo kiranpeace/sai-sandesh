@@ -1,0 +1,41 @@
+name: EAS iOS Build
+
+# Manual trigger only: run from the Actions tab to produce a signed
+# production IPA for the App Store. Uses the EXPO_TOKEN repo secret and
+# App Store Connect API key secrets (ASC_KEY_P8_BASE64, ASC_KEY_ID, ASC_ISSUER_ID).
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Write App Store Connect API key
+        run: |
+          mkdir -p ~/.appstoreconnect
+          echo "${{ secrets.ASC_KEY_P8_BASE64 }}" | base64 -d > ~/.appstoreconnect/AuthKey.p8
+          chmod 600 ~/.appstoreconnect/AuthKey.p8
+        env:
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+
+      - name: Build iOS IPA (production)
+        run: eas build --platform ios --profile production --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          EXPO_ASC_KEY_P8_PATH: ~/.appstoreconnect/AuthKey.p8

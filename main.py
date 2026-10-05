@@ -116,6 +116,45 @@ def api_archive():
 # Mirrors ~/workspace/sai-corpus/search.py (function search(query, topic=None, limit=10))
 # tables: documents, chunks, chunk_topics, chunks_fts (FTS5, BM25 rank).
 
+import difflib as _difflib
+
+_VOCAB = []
+_vp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vocab.txt")
+if os.path.isfile(_vp):
+    with open(_vp, encoding="utf-8") as _f:
+        _VOCAB = [l.strip() for l in _f if l.strip()]
+_VOCAB_SET = set(_VOCAB)
+
+
+def _suggest_query(q: str) -> str | None:
+    """Typo-tolerant 'did you mean': correct each query word against the
+    corpus vocabulary. Returns corrected query or None if nothing to fix."""
+    words = re.findall(r"[A-Za-z']+", q)
+    if not words:
+        return None
+    fixed, changed = [], False
+    for w in words:
+        lw = w.lower()
+        if lw in _VOCAB_SET or len(lw) <= 3:
+            fixed.append(w)
+            continue
+        m = _difflib.get_close_matches(lw, _VOCAB, n=1, cutoff=0.78)
+        if m and m[0] != lw:
+            fixed.append(m[0])
+            changed = True
+        else:
+            fixed.append(w)
+    if not changed:
+        return None
+    # rebuild preserving non-word chars from original
+    out, wi = [], 0
+    for tok in re.findall(r"[A-Za-z']+|[^A-Za-z']+", q):
+        if re.fullmatch(r"[A-Za-z']+", tok):
+            out.append(fixed[wi]); wi += 1
+        else:
+            out.append(tok)
+    return "".join(out)
+
 def _sanitize(q: str) -> str:
     q = q.strip()
     if not q:
@@ -213,7 +252,30 @@ def api_search(
                     "excerpt": txt,
                 }
             )
-        return out
+        did_you_mean = None
+        if not out:
+            fixed = _suggest_query(q)
+            if fixed and fixed.lower() != q.lower():
+                try:
+                    rows2 = c.execute(sql, (_sanitize(fixed), *((topic_id,) if topic_id is not None else ()), limit)).fetchall()
+                except sqlite3.OperationalError:
+                    rows2 = []
+                if rows2:
+                    did_you_mean = fixed
+                    for r in rows2:
+                        txt = _excerpt(r["text"], fixed)
+                        out.append(
+                            {
+                                "doc_id": r["doc_id"],
+                                "gist": r["gist"],
+                                "title": r["title"],
+                                "volume": r["volume"],
+                                "date": r["discourse_date"],
+                                "citation": _cite(r["kind"], r["title"], r["volume"], r["discourse_date"]),
+                                "excerpt": txt,
+                            }
+                        )
+        return {"results": out, "did_you_mean": did_you_mean}
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=400, detail=f"bad query: {e}")
     except ValueError as e:

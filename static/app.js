@@ -252,13 +252,18 @@ async function runSearch() {
     if (topic) params.set("topic", topic);
     const r = await fetch("/api/search?" + params.toString());
     if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.detail || "search failed"); }
-    const hits = await r.json();
-    if (!hits.length) { box.innerHTML = '<div class="empty">No passages found. Try a different word.</div>'; return; }
-    box.innerHTML = '<div class="card">' + hits.map((h) =>
+    const data = await r.json();
+    const hits = data.results || [];
+    const dym = data.did_you_mean;
+    const dymHtml = dym ? '<div class="did-you-mean">Did you mean <button class="dym-link" id="dym-btn">' + esc(dym) + '</button>?</div>' : '';
+    if (!hits.length) { box.innerHTML = dymHtml + '<div class="empty">No passages found. Try a different word.</div>'; return; }
+    box.innerHTML = dymHtml + '<div class="card">' + hits.map((h) =>
       '<div class="result-item"><button class="result-link" data-doc="' + h.doc_id + '">' +
       esc(h.citation || h.title) + ' <span class="read-more">Read full →</span></button>' +
       (h.gist ? '<p class="result-gist"><span class="gist-label">Meaning:</span> ' + esc(h.gist) + "</p>" : "") +
       '<p class="result-excerpt">' + esc(h.excerpt) + "</p></div>").join("") + "</div>";
+    const dymBtn = $("#dym-btn");
+    if (dymBtn) dymBtn.addEventListener("click", () => { $("#search-q").value = dym; runSearch(); });
     box.querySelectorAll("[data-doc]").forEach((b) =>
       b.addEventListener("click", () => openDiscourse(b.getAttribute("data-doc"))));
   } catch (e) {

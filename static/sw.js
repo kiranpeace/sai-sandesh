@@ -3,7 +3,7 @@
    cached at runtime so previously-viewed days re-read offline. */
 "use strict";
 
-const VERSION = "sai-sandesh-v1";
+const VERSION = "sai-sandesh-v2";
 const SHELL = [
   "/",
   "/static/index.html",

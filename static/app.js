@@ -102,7 +102,9 @@ function renderDevotional(dev, container) {
 async function loadToday() {
   const el = $("#today-content");
   try {
-    const r = await fetch("/api/recent?limit=7");
+    const d = new Date();
+    const localISO = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    const r = await fetch("/api/recent?limit=7&as_of=" + localISO);
     if (!r.ok) throw new Error("not ready");
     const days = await r.json();
     if (!days.length) throw new Error("empty");

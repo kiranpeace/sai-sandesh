@@ -61,9 +61,17 @@ def api_today():
 
 @app.get("/api/recent")
 @app.get(V1 + "/recent")
-def api_recent(limit: int = Query(default=7, ge=1, le=30)):
+def api_recent(
+    limit: int = Query(default=7, ge=1, le=30),
+    as_of: str | None = Query(default=None),
+):
     """Most recent devotionals, newest first. Accumulates past days so the
-    Thought for the Day feed keeps history instead of replacing it."""
+    Thought for the Day feed keeps history instead of replacing it.
+    as_of=YYYY-MM-DD pins 'today' to the visitor's date (server is UTC)."""
+    if as_of and DATE_RE.match(as_of):
+        today = as_of
+    else:
+        today = date.today().isoformat()
     ddir = os.path.join(DATA_DIR, "devotionals")
     dates = []
     if os.path.isdir(ddir):
@@ -71,7 +79,6 @@ def api_recent(limit: int = Query(default=7, ge=1, le=30)):
             if fn.endswith(".json") and DATE_RE.match(fn[:-5]):
                 dates.append(fn[:-5])
     dates.sort(reverse=True)
-    today = date.today().isoformat()
     out = []
     for day in dates:
         if day > today:

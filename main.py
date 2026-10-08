@@ -71,8 +71,13 @@ def api_recent(limit: int = Query(default=7, ge=1, le=30)):
             if fn.endswith(".json") and DATE_RE.match(fn[:-5]):
                 dates.append(fn[:-5])
     dates.sort(reverse=True)
+    today = date.today().isoformat()
     out = []
-    for day in dates[:limit]:
+    for day in dates:
+        if day > today:
+            continue  # don't show future devotionals
+        if len(out) >= limit:
+            break
         try:
             out.append(_load_devotional(day))
         except HTTPException:

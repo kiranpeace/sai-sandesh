@@ -102,9 +102,25 @@ function renderDevotional(dev, container) {
 async function loadToday() {
   const el = $("#today-content");
   try {
-    const r = await fetch("/api/today");
+    const r = await fetch("/api/recent?limit=7");
     if (!r.ok) throw new Error("not ready");
-    renderDevotional(await r.json(), el);
+    const days = await r.json();
+    if (!days.length) throw new Error("empty");
+    el.innerHTML = "";
+    days.forEach((dev, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "devotional-day" + (i > 0 ? " devotional-past" : "");
+      if (i > 0) {
+        const divider = document.createElement("div");
+        divider.className = "day-divider";
+        divider.innerHTML = "<span>" + esc(fmtDate(dev.date)) + "</span>";
+        wrap.appendChild(divider);
+      }
+      const body = document.createElement("div");
+      renderDevotional(dev, body);
+      wrap.appendChild(body);
+      el.appendChild(wrap);
+    });
   } catch (e) {
     el.innerHTML = '<div class="card"><div class="empty">🙏<br>Today\'s Sandesh is not ready yet.<br>Please check back soon.</div></div>';
   }

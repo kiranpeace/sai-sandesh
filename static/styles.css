@@ -94,6 +94,9 @@ main { max-width: 640px; margin: 0 auto; padding: 16px 16px 24px; }
   gap: 8px;
 }
 .section-label::after { content: ""; flex: 1; height: 1px; background: #ecd9b8; }
+.day-divider { display: flex; align-items: center; gap: 12px; margin: 28px 4px 16px; color: var(--ink-soft, #6b5f4e); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.day-divider::before, .day-divider::after { content: ""; flex: 1; height: 1px; background: #d9c9a8; }
+.devotional-past { opacity: 0.92; }
 
 .discourse-excerpt {
   font-family: Georgia, serif;

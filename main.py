@@ -59,6 +59,27 @@ def api_today():
     return _load_devotional(date.today().isoformat())
 
 
+@app.get("/api/recent")
+@app.get(V1 + "/recent")
+def api_recent(limit: int = Query(default=7, ge=1, le=30)):
+    """Most recent devotionals, newest first. Accumulates past days so the
+    Thought for the Day feed keeps history instead of replacing it."""
+    ddir = os.path.join(DATA_DIR, "devotionals")
+    dates = []
+    if os.path.isdir(ddir):
+        for fn in os.listdir(ddir):
+            if fn.endswith(".json") and DATE_RE.match(fn[:-5]):
+                dates.append(fn[:-5])
+    dates.sort(reverse=True)
+    out = []
+    for day in dates[:limit]:
+        try:
+            out.append(_load_devotional(day))
+        except HTTPException:
+            continue
+    return out
+
+
 @app.get("/api/day/{day}")
 @app.get(V1 + "/day/{day}")
 def api_day(day: str):

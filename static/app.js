@@ -9,6 +9,22 @@ function esc(s) {
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+function fmtShortDate(iso) {
+  // iso: YYYY-MM-DD -> e.g. "10 Feb 2000"
+  const d = new Date(iso + "T12:00:00");
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function provLine(h) {
+  // where + when for a search hit: e.g. "Prasanthi Nilayam · 10 Feb 2000"
+  const bits = [];
+  if (h.location) bits.push(h.location);
+  if (h.date) bits.push(fmtShortDate(h.date));
+  if (!bits.length) return "";
+  return '<p class="result-prov">📍 ' + esc(bits.join(" · ")) + "</p>";
+}
+
 function fmtDate(iso) {
   // iso: YYYY-MM-DD -> e.g. "Sunday, 4 October 2026"
   const d = new Date(iso + "T12:00:00");
@@ -278,6 +294,7 @@ async function runSearch() {
     box.innerHTML = dymHtml + '<div class="card">' + hits.map((h) =>
       '<div class="result-item"><button class="result-link" data-doc="' + h.doc_id + '">' +
       esc(h.citation || h.title) + ' <span class="read-more">Read full →</span></button>' +
+      provLine(h) +
       (h.gist ? '<p class="result-gist"><span class="gist-label">Meaning:</span> ' + esc(h.gist) + "</p>" : "") +
       '<p class="result-excerpt">' + esc(h.excerpt) + "</p></div>").join("") + "</div>";
     const dymBtn = $("#dym-btn");

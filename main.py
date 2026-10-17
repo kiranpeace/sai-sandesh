@@ -26,6 +26,79 @@ app = FastAPI(title="Sai Sandesh", version="0.1.0")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9\-]*$")
 
+# Sources excluded from search: the Sri Sathya Sai Global Council (SSSGC)
+# publications are not carried by Sai Sandesh (SSSIO lineage only).
+EXCLUDED_SOURCE_PATTERNS = ("%sssgc%", "%globalcouncil%", "%global-council%")
+
+# Known discourse venues, longest-first. The corpus "Location:" header is
+# inconsistently formatted (sometimes the discourse text continues on the same
+# line), so extraction matches the longest known venue prefix instead of
+# guessing at word boundaries.
+LOCATION_WHITELIST = [
+    "Chitravathi River Bed",
+    "Sardar Patel Stadium, Mumbai",
+    "Students Hostel, Prasanthi Nilayam",
+    "Sai Ramesh Hall, Brindavan",
+    "Chennai, Y.M.I.A., Mylapore",
+    "Bengaluru, Malleswaram",
+    "Chakur, Maharashtra",
+    "Kammavaripalli village",
+    "Prasanthi Nilayam",
+    "Brindavan",
+    "Mumbai",
+    "Bengaluru",
+    "Chennai",
+    "Anantapur",
+    "Kodaikanal",
+    "Hyderabad",
+    "Venkatagiri",
+    "Rajamundry",
+    "Mysore",
+    "Chitthoor",
+    "Tirupati",
+    "Repalle",
+    "Hindupur",
+    "Muddenahalli",
+    "Aukiripalli",
+    "Coimbatore",
+    "Lucknow",
+    "Nainital",
+    "Bukkapatnam",
+    "Srisailam",
+    "Penukonda",
+    "Kurnool",
+    "Sathyavada",
+    "Dharmavaram",
+    "Kothacheruvu",
+    "Pune",
+    "Thiruthani",
+    "Ooty",
+    "Secunderabad",
+    "Gudur",
+    "Nellore",
+    "Chakur",
+]
+
+_LOCATION_RE = re.compile(r"Location:\s*(.{0,80})")
+
+
+def _extract_location(head_text: str | None) -> str | None:
+    """Venue where a discourse was given, from the corpus Location: header."""
+    if not head_text:
+        return None
+    m = _LOCATION_RE.search(head_text)
+    if not m:
+        return None
+    rest = m.group(1)
+    for loc in LOCATION_WHITELIST:
+        if rest.startswith(loc):
+            return loc
+    return None
+
+
+def _source_exclusion_sql() -> str:
+    return " AND ".join(f"d.source_url NOT LIKE '{p}'" for p in EXCLUDED_SOURCE_PATTERNS)
+
 
 def _load_json(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
@@ -253,21 +326,25 @@ def api_search(
             topic_id = row["id"]
 
         match = _sanitize(q)
+        excl = _source_exclusion_sql()
+        head_sql = "(SELECT c0.text FROM chunks c0 WHERE c0.doc_id = d.id AND c0.seq = 0) AS head"
         if topic_id is not None:
-            sql = """SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
+            sql = f"""SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date,
+                     {head_sql}
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
                      JOIN chunk_topics ct ON ct.chunk_id = c.id
-                     WHERE chunks_fts MATCH ? AND ct.topic_id = ?
+                     WHERE chunks_fts MATCH ? AND ct.topic_id = ? AND {excl}
                      ORDER BY bm25(chunks_fts) LIMIT ?"""
             rows = c.execute(sql, (match, topic_id, limit)).fetchall()
         else:
-            sql = """SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date
+            sql = f"""SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date,
+                     {head_sql}
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
-                     WHERE chunks_fts MATCH ?
+                     WHERE chunks_fts MATCH ? AND {excl}
                      ORDER BY bm25(chunks_fts) LIMIT ?"""
             rows = c.execute(sql, (match, limit)).fetchall()
 
@@ -281,6 +358,7 @@ def api_search(
                     "title": r["title"],
                     "volume": r["volume"],
                     "date": r["discourse_date"],
+                    "location": _extract_location(r["head"]),
                     "citation": _cite(r["kind"], r["title"], r["volume"], r["discourse_date"]),
                     "excerpt": txt,
                 }
@@ -304,6 +382,7 @@ def api_search(
                                 "title": r["title"],
                                 "volume": r["volume"],
                                 "date": r["discourse_date"],
+                                "location": _extract_location(r["head"]),
                                 "citation": _cite(r["kind"], r["title"], r["volume"], r["discourse_date"]),
                                 "excerpt": txt,
                             }

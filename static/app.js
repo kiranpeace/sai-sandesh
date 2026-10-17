@@ -65,14 +65,17 @@ function renderDevotional(dev, container) {
 
   if (dev.video && dev.video.url) {
     const embed = youtubeEmbedUrl(dev.video.url);
-    let html = '<div class="card"><div class="section-label">🎬 Watch</div>';
+    const isAudio = /\.(mp3|m4a|ogg|wav)(\?|#|$)/i.test(dev.video.url);
+    let html = '<div class="card"><div class="section-label">' + (isAudio ? "🎧 Listen" : "🎬 Watch") + "</div>";
     if (dev.video.title) html += "<h3 style='margin:0 0 8px'>" + esc(dev.video.title) + "</h3>";
-    if (embed) {
+    if (isAudio) {
+      html += '<audio controls preload="none" src="' + esc(dev.video.url) + '" style="width:100%;margin:4px 0 8px"></audio>';
+    } else if (embed) {
       html += '<div class="video-embed"><iframe src="' + embed + '" title="' + esc(dev.video.title || "Video") +
         '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
     }
     html += '<div class="btn-row"><a class="btn btn-indigo" href="' + esc(dev.video.url) +
-      '" target="_blank" rel="noopener">▶ Watch on YouTube</a></div></div>';
+      '" target="_blank" rel="noopener">' + (isAudio ? "🎧 Open audio" : "▶ Watch on YouTube") + "</a></div></div>";
     parts.push(html);
   }
 

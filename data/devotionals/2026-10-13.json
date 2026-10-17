@@ -10,10 +10,12 @@
     "theme": "Turn inward — purify the mind and focus it on Divinity."
   },
   "reflection": "O foolish mind — where are you rushing off to? Swami asks this of your restless thoughts with a smile: the Brahman you chase in temples and travels is sitting quietly within you. The day's practice is simple: when the mind scatters, gently call it back inward. There is no greater fortune than finding Him there.",
-  "video": null,
+  "video": {
+    "title": "Managing the Mind | Prem Anosh",
+    "url": "https://www.youtube.com/watch?v=VfyhU-1pXQw"
+  },
   "bhajan": {
-    "title": "Manasa Bhajore Guru Charanam",
-    "url": "https://www.youtube.com/watch?v=My0fGAJRCWI"
+    "title": "Manasa Bhajore Guru Charanam"
   },
   "seva_nudge": "Spend five phone-free minutes in quiet with Swami's name. That stillness is today's seva to your own heart.",
   "share_card": "/cards/2026-10-13.png",

@@ -413,7 +413,11 @@ function openBhajan(i) {
   html += "<h3 style='margin:0 0 8px'>" + esc(b.title) + "</h3>";
   if (bhajanTags(b).length) html += '<p class="bhajan-deity-line">' + esc(bhajanTags(b).join(" · ")) + "</p>";
   if (b.audio) {
-    html += '<audio controls preload="none" src="' + esc(b.audio) + '" style="width:100%;margin:4px 0 8px"></audio>';
+    if (b.audio.indexOf("soundcloud.com") !== -1) {
+      html += '<iframe width="100%" height="150" scrolling="no" frameborder="no" loading="lazy" style="margin:4px 0 8px" src="' + esc(b.audio) + '&auto_play=false"></iframe>';
+    } else {
+      html += '<audio controls preload="none" src="' + esc(b.audio) + '" style="width:100%;margin:4px 0 8px"></audio>';
+    }
   }
   if (b.lyrics) html += '<div class="lyrics">' + esc(b.lyrics) + "</div>";
   html += '<div class="btn-row"><a class="btn btn-outline" href="' + esc(b.url) +

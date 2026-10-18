@@ -218,6 +218,38 @@ def api_archive():
     return sorted(dates, reverse=True)
 
 
+_BHAJANS_CACHE: list | None = None
+
+
+def _load_bhajans() -> list:
+    """Bhajan library from data/bhajans.json (Sai Rhythms, SSSIO). Cached."""
+    global _BHAJANS_CACHE
+    if _BHAJANS_CACHE is None:
+        path = os.path.join(DATA_DIR, "bhajans.json")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                docs = json.load(f)
+            _BHAJANS_CACHE = docs if isinstance(docs, list) else []
+        except (OSError, json.JSONDecodeError):
+            _BHAJANS_CACHE = []
+    return _BHAJANS_CACHE
+
+
+@app.get("/api/bhajans")
+@app.get(V1 + "/bhajans")
+def api_bhajans(q: str | None = Query(default=None)):
+    """Bhajan library. ?q= filters by case-insensitive substring match on
+    title and lyrics; no query returns the full list."""
+    songs = _load_bhajans()
+    if q:
+        needle = q.strip().lower()
+        songs = [
+            s for s in songs
+            if needle in s.get("title", "").lower() or needle in s.get("lyrics", "").lower()
+        ]
+    return songs
+
+
 # ------------------------------------------------------- corpus search
 # Mirrors ~/workspace/sai-corpus/search.py (function search(query, topic=None, limit=10))
 # tables: documents, chunks, chunk_topics, chunks_fts (FTS5, BM25 rank).

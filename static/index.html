@@ -59,6 +59,15 @@
       </div>
     </section>
 
+    <!-- BHAJANS (library; Sai Rhythms, SSSIO) -->
+    <section id="view-bhajans" class="view" aria-label="Bhajans">
+      <div class="card">
+        <input id="bhajan-q" type="search" placeholder="Search bhajans…" enterkeyhint="search" />
+        <div id="bhajan-chips" class="chip-row"></div>
+      </div>
+      <div id="bhajan-list"></div>
+    </section>
+
     <!-- READER (full discourse; reached from search results) -->
     <section id="view-reader" class="view" aria-label="Discourse">
       <div class="card">
@@ -71,6 +80,7 @@
   <nav class="bottom-nav" aria-label="Main navigation">
     <button data-view="today" class="active"><span class="ico">🌅</span>Today</button>
     <button data-view="topics"><span class="ico">📿</span>Topics</button>
+    <button data-view="bhajans"><span class="ico">🎵</span>Bhajans</button>
     <button data-view="search"><span class="ico">🔍</span>Search</button>
     <button data-view="archive"><span class="ico">📚</span>Archive</button>
   </nav>

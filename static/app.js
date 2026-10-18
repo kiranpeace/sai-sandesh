@@ -349,6 +349,79 @@ async function loadArchive() {
   }
 }
 
+/* ---------------- bhajans (library; Sai Rhythms, SSSIO) ---------------- */
+
+let bhajansCache = null;
+let bhajanDeity = "All";
+
+function bhajanTags(b) {
+  return (b.deity || "").split(",").map((t) => t.trim()).filter(Boolean);
+}
+
+async function loadBhajans() {
+  const list = $("#bhajan-list");
+  try {
+    if (!bhajansCache) {
+      const r = await fetch("/api/bhajans");
+      bhajansCache = await r.json();
+    }
+    if (!bhajansCache.length) {
+      list.innerHTML = '<div class="empty">Bhajans are on their way.</div>';
+      return;
+    }
+    const counts = {};
+    bhajansCache.forEach((b) => bhajanTags(b).forEach((t) => { counts[t] = (counts[t] || 0) + 1; }));
+    const chips = ["All"].concat(Object.keys(counts).sort((a, b2) => counts[b2] - counts[a]));
+    $("#bhajan-chips").innerHTML = chips.map((c) =>
+      '<button class="chip' + (c === bhajanDeity ? " active" : "") + '" data-deity="' + esc(c) + '">' +
+      esc(c) + (c === "All" ? "" : " · " + counts[c]) + "</button>").join("");
+    $("#bhajan-chips").querySelectorAll(".chip").forEach((b) =>
+      b.addEventListener("click", () => { bhajanDeity = b.getAttribute("data-deity"); loadBhajans(); }));
+    renderBhajanList();
+  } catch (e) {
+    list.innerHTML = '<div class="error">Could not load bhajans.</div>';
+  }
+}
+
+function renderBhajanList() {
+  const list = $("#bhajan-list");
+  const q = ($("#bhajan-q").value || "").trim().toLowerCase();
+  const rows = bhajansCache.filter((b) => {
+    if (bhajanDeity !== "All" && !bhajanTags(b).includes(bhajanDeity)) return false;
+    if (q && !(b.title.toLowerCase().includes(q) || (b.lyrics || "").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  if (!rows.length) {
+    list.innerHTML = '<div class="empty">No bhajans match. Try another search.</div>';
+    return;
+  }
+  list.innerHTML = rows.map((b) => {
+    const i = bhajansCache.indexOf(b);
+    return '<button class="bhajan-row" data-i="' + i + '"><span class="bhajan-title">' + esc(b.title) +
+      '</span><span class="bhajan-deity">' + esc(bhajanTags(b).join(" · ")) + "</span></button>";
+  }).join("");
+  list.querySelectorAll(".bhajan-row").forEach((b) =>
+    b.addEventListener("click", () => openBhajan(parseInt(b.getAttribute("data-i"), 10))));
+}
+
+function openBhajan(i) {
+  const b = bhajansCache[i];
+  if (!b) return;
+  const list = $("#bhajan-list");
+  let html = '<span class="back-link" id="bhajan-back">← All bhajans</span>';
+  html += '<div class="card"><div class="section-label">🎵 Bhajan</div>';
+  html += "<h3 style='margin:0 0 8px'>" + esc(b.title) + "</h3>";
+  if (bhajanTags(b).length) html += '<p class="bhajan-deity-line">' + esc(bhajanTags(b).join(" · ")) + "</p>";
+  if (b.audio) {
+    html += '<audio controls preload="none" src="' + esc(b.audio) + '" style="width:100%;margin:4px 0 8px"></audio>';
+  }
+  if (b.lyrics) html += '<div class="lyrics">' + esc(b.lyrics) + "</div>";
+  html += '<div class="btn-row"><a class="btn btn-outline" href="' + esc(b.url) +
+    '" target="_blank" rel="noopener">🎵 Open on Sai Rhythms</a></div></div>';
+  list.innerHTML = html;
+  $("#bhajan-back").addEventListener("click", renderBhajanList);
+}
+
 /* ---------------- nav ---------------- */
 
 function switchView(name) {
@@ -358,6 +431,7 @@ function switchView(name) {
     b.classList.toggle("active", b.getAttribute("data-view") === name));
   window.scrollTo(0, 0);
   if (name === "topics" && !$("#topics-content").dataset.loaded) { $("#topics-content").dataset.loaded = "1"; loadTopics(); }
+  if (name === "bhajans" && !$("#bhajan-list").dataset.loaded) { $("#bhajan-list").dataset.loaded = "1"; loadBhajans(); }
   if (name === "archive") loadArchive();
 }
 
@@ -366,6 +440,7 @@ document.querySelectorAll(".bottom-nav button").forEach((b) =>
 
 $("#search-btn").addEventListener("click", runSearch);
 $("#search-q").addEventListener("keydown", (e) => { if (e.key === "Enter") runSearch(); });
+$("#bhajan-q").addEventListener("input", () => { if (bhajansCache) renderBhajanList(); });
 
 loadToday();
 populateTopicDropdown();

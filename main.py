@@ -360,25 +360,52 @@ def api_search(
         match = _sanitize(q)
         excl = _source_exclusion_sql()
         head_sql = "(SELECT c0.text FROM chunks c0 WHERE c0.doc_id = d.id AND c0.seq = 0) AS head"
-        if topic_id is not None:
-            sql = f"""SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date,
-                     {head_sql}
+        cols = f"""c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date,
+                     {head_sql}"""
+
+        def _search_kind(kind: str, n: int, match_str: str):
+            """Top-n chunk matches restricted to one document kind, by BM25."""
+            if topic_id is not None:
+                sql = f"""SELECT {cols}
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
                      JOIN chunk_topics ct ON ct.chunk_id = c.id
-                     WHERE chunks_fts MATCH ? AND ct.topic_id = ? AND {excl}
+                     WHERE chunks_fts MATCH ? AND d.kind = ? AND ct.topic_id = ? AND {excl}
                      ORDER BY bm25(chunks_fts) LIMIT ?"""
-            rows = c.execute(sql, (match, topic_id, limit)).fetchall()
-        else:
-            sql = f"""SELECT c.text, c.gist, d.id AS doc_id, d.kind, d.title, d.volume, d.discourse_date,
-                     {head_sql}
+                return c.execute(sql, (match_str, kind, topic_id, n)).fetchall()
+            sql = f"""SELECT {cols}
                      FROM chunks_fts
                      JOIN chunks c ON c.id = chunks_fts.rowid
                      JOIN documents d ON d.id = c.doc_id
-                     WHERE chunks_fts MATCH ? AND {excl}
+                     WHERE chunks_fts MATCH ? AND d.kind = ? AND {excl}
                      ORDER BY bm25(chunks_fts) LIMIT ?"""
-            rows = c.execute(sql, (match, limit)).fetchall()
+            return c.execute(sql, (match_str, kind, n)).fetchall()
+
+        def _run(match_str: str):
+            """Interleaved top matches across discourses and Vahinis."""
+            d_rows = _search_kind("discourse", limit, match_str)
+            v_rows = _search_kind("vahini", limit, match_str)
+            merged, seen = [], set()
+            for pair in zip(d_rows, v_rows):
+                for r in pair:
+                    if r["doc_id"] not in seen:
+                        seen.add(r["doc_id"])
+                        merged.append(r)
+                    if len(merged) >= limit:
+                        break
+                if len(merged) >= limit:
+                    break
+            if len(merged) < limit:
+                for r in list(d_rows) + list(v_rows):
+                    if r["doc_id"] not in seen:
+                        seen.add(r["doc_id"])
+                        merged.append(r)
+                    if len(merged) >= limit:
+                        break
+            return merged
+
+        rows = _run(match)
 
         out = []
         for r in rows:
@@ -400,7 +427,7 @@ def api_search(
             fixed = _suggest_query(q)
             if fixed and fixed.lower() != q.lower():
                 try:
-                    rows2 = c.execute(sql, (_sanitize(fixed), *((topic_id,) if topic_id is not None else ()), limit)).fetchall()
+                    rows2 = _run(_sanitize(fixed))
                 except sqlite3.OperationalError:
                     rows2 = []
                 if rows2:

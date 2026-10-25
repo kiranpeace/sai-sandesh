@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-24",
+  "greeting": "Sai Ram.",
+  "discourse": {
+    "title": "Peace through Seva",
+    "date": "24 November 1987",
+    "occasion": "Sathya Sai Active Workers Conference",
+    "volume": "Sri Sathya Sai Speaks, Vol 20 (1987)",
+    "excerpt": "Man is perpetually engaged in the search for peace. The seeker of peace must search for it not in matham (religion) but in manam (the mind).",
+    "theme": "Peace is not found outside — the seeker must search for it not in religion but in the mind itself."
+  },
+  "reflection": "Swami corrects the usual search: peace is not a place, a ritual or an external change, but a state of the mind to be established within first. Today, spend five quiet minutes calming the mind before you act — one calm reply instead of a reactive one is peace beginning within. (Sri Sathya Sai Speaks, Vol 20, 24 Nov 1987)",
+  "bhajan": {
+    "title": "Anandamaya Sai",
+    "url": "https://sairhythms.sathyasai.org/song/anandamaya-sai"
+  },
+  "seva_nudge": "Bring peace to one tense situation today — listen fully before answering, and offer a calm, kind word where a sharp one is expected.",
+  "share_card": "/cards/2026-11-24.png",
+  "fallback": false
+}
